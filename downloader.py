@@ -1,5 +1,4 @@
 import yt_dlp
-import re
 
 def baixar_video(link, callback_status, callback_progresso):
     def hook(d):
