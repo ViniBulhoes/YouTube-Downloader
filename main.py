@@ -2,60 +2,132 @@ import customtkinter as ctk
 import threading
 from downloader import baixar_video
 
-def iniciar_download():
-    link = entrada.get()
-    if not link:
-        status.configure(text="Cole um link primeiro!", text_color="red")
-        return
+class YouTubeDownloaderApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
 
-    # Mostra a barra e aumenta a janela
-    barra.pack(pady=5)
-    porcentagem_label.pack()
-    app.geometry("500x260")
+        # Configurações da Janela
+        self.title("YouTube Downloader")
+        self.geometry("560x420")
+        self.resizable(False, False)
+        
+        # Tema Escuro Global
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("blue")
 
-    botao.configure(state="disabled")
-    status.configure(text="Baixando...", text_color="yellow")
-    barra.set(0)
-    porcentagem_label.configure(text="0%")
+        # Título Principal
+        self.lbl_titulo = ctk.CTkLabel(self, text="YouTube Downloader", font=("Segoe UI", 24, "bold"))
+        self.lbl_titulo.pack(pady=(30, 15))
 
-    def processo():
-        baixar_video(
-            link,
-            lambda texto, cor: status.configure(text=texto, text_color=cor),
-            atualizar_barra
+        # "Card" principal que vai agrupar os elementos para criar profundidade
+        self.card = ctk.CTkFrame(self, corner_radius=15)
+        self.card.pack(padx=40, pady=5, fill="both", expand=True)
+
+        # Entrada de Link (Ocupando toda a largura do card)
+        self.entrada = ctk.CTkEntry(
+            self.card, 
+            placeholder_text="Cole o link do vídeo aqui...", 
+            height=45, 
+            font=("Segoe UI", 14),
+            border_width=1
         )
-        botao.configure(state="normal")
+        self.entrada.pack(padx=25, pady=(25, 15), fill="x")
 
-    threading.Thread(target=processo).start()
+        # Frame interno para colocar os ComboBoxes alinhados e proporcionais
+        self.frame_opcoes = ctk.CTkFrame(self.card, fg_color="transparent")
+        self.frame_opcoes.pack(padx=25, pady=5, fill="x")
+        
+        self.frame_opcoes.columnconfigure(0, weight=1)
+        self.frame_opcoes.columnconfigure(1, weight=1)
 
-def atualizar_barra(valor):
-    barra.set(valor / 100)
-    porcentagem_label.configure(text=f"{valor}%")
+        self.combo_tipo = ctk.CTkComboBox(
+            self.frame_opcoes, 
+            values=["Vídeo com Áudio", "Apenas Áudio", "Apenas Vídeo"],
+            height=35,
+            font=("Segoe UI", 13)
+        )
+        self.combo_tipo.grid(row=0, column=0, padx=(0, 10), sticky="ew")
+        self.combo_tipo.set("Vídeo com Áudio")
 
-# Janela
-ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("blue")
+        self.combo_resolucao = ctk.CTkComboBox(
+            self.frame_opcoes, 
+            values=["2160", "1080", "720", "480", "360"],
+            height=35,
+            font=("Segoe UI", 13)
+        )
+        self.combo_resolucao.grid(row=0, column=1, padx=(10, 0), sticky="ew")
+        self.combo_resolucao.set("1080")
 
-app = ctk.CTk()
-app.title("YouTube Downloader")
-app.geometry("500x200")  # tamanho inicial menor
-app.resizable(False, False)
+        # Botão Baixar (Mais largo e destacado)
+        self.botao = ctk.CTkButton(
+            self.card, 
+            text="Iniciar Download", 
+            command=self.iniciar_download, 
+            height=45, 
+            font=("Segoe UI", 15, "bold"),
+            corner_radius=8
+        )
+        self.botao.pack(padx=25, pady=(20, 15), fill="x")
 
-ctk.CTkLabel(app, text="YouTube Downloader", font=("Arial", 20, "bold")).pack(pady=15)
+        # Rodapé do Card (Status e Porcentagem lado a lado)
+        self.frame_status = ctk.CTkFrame(self.card, fg_color="transparent")
+        self.frame_status.pack(padx=25, pady=(0, 20), fill="x")
 
-entrada = ctk.CTkEntry(app, width=400, placeholder_text="Cole o link do vídeo aqui...")
-entrada.pack(pady=5)
+        self.status = ctk.CTkLabel(self.frame_status, text="Aguardando link...", text_color="gray", font=("Segoe UI", 12))
+        self.status.pack(side="left")
 
-botao = ctk.CTkButton(app, text="Baixar", command=iniciar_download, width=200)
-botao.pack(pady=10)
+        self.lbl_porcentagem = ctk.CTkLabel(self.frame_status, text="0%", text_color="gray", font=("Segoe UI", 13, "bold"))
+        self.lbl_porcentagem.pack(side="right")
 
-status = ctk.CTkLabel(app, text="")
-status.pack(pady=5)
+        # Barra de Progresso (Fora do card principal, na parte inferior da tela)
+        self.barra = ctk.CTkProgressBar(self, height=8, corner_radius=5)
+        self.barra.pack(padx=40, pady=(15, 30), fill="x")
+        self.barra.set(0)
 
-# Barra escondida no início
-barra = ctk.CTkProgressBar(app, width=400)
-barra.set(0)
+    def atualizar_status(self, texto, cor):
+        self.after(0, lambda: self.status.configure(text=texto, text_color=cor))
 
-porcentagem_label = ctk.CTkLabel(app, text="0%", font=("Arial", 14, "bold"))
+    def atualizar_barra(self, valor):
+        self.after(0, lambda: self.barra.set(valor / 100))
+        # Muda a cor da porcentagem para branco durante o download para dar destaque
+        self.after(0, lambda: self.lbl_porcentagem.configure(text=f"{valor}%", text_color="white"))
 
-app.mainloop()
+    def iniciar_download(self):
+        link = self.entrada.get()
+        if not link:
+            self.atualizar_status("Cole um link primeiro!", "#ff6b6b") # Vermelho mais suave
+            return
+
+        mapa_tipos = {
+            "Vídeo com Áudio": "video_com_audio",
+            "Apenas Áudio": "apenas_audio",
+            "Apenas Vídeo": "apenas_video"
+        }
+        tipo_escolhido = mapa_tipos[self.combo_tipo.get()]
+        resolucao_escolhida = self.combo_resolucao.get()
+
+        # Prepara a interface para o início
+        self.botao.configure(state="disabled", text="Baixando...")
+        self.atualizar_status("Iniciando conexão...", "#feca57") # Amarelo mais suave
+        self.barra.set(0)
+        self.lbl_porcentagem.configure(text="0%", text_color="gray")
+
+        threading.Thread(
+            target=self.processo_thread, 
+            args=(link, tipo_escolhido, resolucao_escolhida),
+            daemon=True
+        ).start()
+
+    def processo_thread(self, link, tipo, resolucao):
+        baixar_video(
+            link=link,
+            callback_status=self.atualizar_status,
+            callback_progresso=self.atualizar_barra,
+            tipo=tipo,
+            resolucao=resolucao
+        )
+        self.after(0, lambda: self.botao.configure(state="normal", text="Iniciar Download"))
+
+if __name__ == "__main__":
+    app = YouTubeDownloaderApp()
+    app.mainloop()
