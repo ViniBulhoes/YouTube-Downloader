@@ -1,25 +1,30 @@
-# 🎬 YouTube Downloader (Projeto Simples)
+# 🎬 YouTube Downloader
 
 ## 📖 Sobre
 
-Projeto simples feito como teste da faculdade para baixar vídeos do YouTube a partir de um link.
+Um aplicativo desktop moderno e minimalista para download de vídeos do YouTube. O projeto evoluiu de um teste acadêmico inicial em Análise e Desenvolvimento de Sistemas (ADS) para uma ferramenta robusta, com interface gráfica focada na experiência do usuário e suporte a downloads em alta resolução.
 
-## ⚙️ O que ele faz
+## 🚀 Novas Funcionalidades (Atualizado)
 
-* Baixa vídeos via URL
-* Suporta até 720p
-* Funciona de forma simples e direta
-* Velocidade de download razoável (depende da internet)
+- **Múltiplas Resoluções:** Suporte nativo para baixar vídeos na qualidade máxima disponível (incluindo 1080p e 4K), superando o limite antigo de 720p.
+- **Opções de Formato:** Permite escolher entre baixar o vídeo completo (Vídeo + Áudio), apenas a trilha sonora (Áudio em MP3) ou apenas a imagem.
+- **Interface Moderna:** Totalmente reescrita utilizando `CustomTkinter` com layout em "Card", tema escuro (Dark Mode) e barra de progresso em tempo real.
+- **Independente e Portátil:** Integração com `imageio-ffmpeg`, embutindo os binários necessários para conversão sem exigir que o usuário instale o FFmpeg manualmente no Windows.
+- **Bypass de Restrições:** Atualizado com as versões mais recentes do `yt-dlp` para mitigar bloqueios de servidor (Erro 403).
 
-## 🛠️ Tecnologias
+## 🛠️ Tecnologias Utilizadas
 
-* (Python)
-* (yt-dlp, customtkinter)
+- **Python 3**
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp):** Motor principal de extração e download.
+- **[CustomTkinter](https://github.com/TomSchimansky/CustomTkinter):** Construção da interface gráfica moderna e responsiva.
+- **[imageio-ffmpeg](https://github.com/imageio/imageio-ffmpeg):** Processamento e junção de áudio/vídeo em segundo plano.
 
-## ⚠️ Aviso
+## 💻 Como Executar na Sua Máquina
 
-Esse projeto é apenas para fins de estudo. Use com responsabilidade.
+1. Clone este repositório:
+   ```bash
+   git clone [https://github.com/ViniBulhoes/YouTube-Downloader.git](https://github.com/ViniBulhoes/YouTube-Downloader.git)
 
-## 🎓 Contexto
+## ⚠️ Aviso Legal
 
-Feito como um teste simples para praticar programação.
+Este projeto foi desenvolvido estritamente para fins de estudo e aprimoramento em programação orientada a objetos. Use com responsabilidade.
